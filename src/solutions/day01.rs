@@ -3,7 +3,7 @@ fn fuel_for_mass(mass: u32) -> u32 {
 }
 
 fn masses<'a>(input: &'a str) -> impl Iterator<Item = u32> + 'a {
-  input.lines().flat_map(|line: &str| line.parse())
+  input.lines().flat_map(|line| line.parse())
 }
 
 fn solve_01(input: &str) -> u32 {
