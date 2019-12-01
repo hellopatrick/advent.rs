@@ -27,9 +27,7 @@ fn solve_02(input: &str) -> u32 {
   masses(input).map(total_fuel_for_mass).sum()
 }
 
-pub fn solve() {
-  let input: &str = include_str!("../../inputs/day01.txt");
-
+pub fn solve(input: &str) {
   let one = solve_01(input);
 
   println!("part 1: {}", one);
