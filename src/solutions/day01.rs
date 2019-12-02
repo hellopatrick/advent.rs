@@ -11,16 +11,15 @@ fn solve_01(input: &str) -> u32 {
 }
 
 fn total_fuel_for_mass(mass: u32) -> u32 {
-  let mut total_fuel = 0;
+  let mut total = 0;
+  let mut new_mass = mass;
 
-  let mut new_fuel = fuel_for_mass(mass);
-
-  while new_fuel > 0 {
-    total_fuel += new_fuel;
-    new_fuel = fuel_for_mass(new_fuel);
+  while new_mass > 0 {
+    new_mass = fuel_for_mass(new_mass);
+    total += new_mass;
   }
 
-  total_fuel
+  total
 }
 
 fn solve_02(input: &str) -> u32 {
