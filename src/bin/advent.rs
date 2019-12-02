@@ -25,6 +25,7 @@ pub fn main() {
 
   let solve = match day {
     1 => solutions::day01::solve,
+    2 => solutions::day02::solve,
     _ => not_implemented,
   };
 
