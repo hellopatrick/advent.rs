@@ -42,8 +42,8 @@ struct Step {
 
 impl From<&str> for Step {
   fn from(s: &str) -> Self {
-    let dir: Dir = s.chars().take(1).next().unwrap().into();
-    let len = s.get(1..).unwrap().parse().unwrap();
+    let dir = s.chars().nth(0).unwrap().into();
+    let len = s[1..].parse().unwrap();
 
     Self { dir, len }
   }
