@@ -1,27 +1,13 @@
+use crate::solutions::intcode::*;
+
 fn run(opcodes: &mut [usize], noun: usize, verb: usize) -> usize {
-  opcodes[1] = noun;
-  opcodes[2] = verb;
+  let mut vm = VM::with(opcodes);
+  vm.set(1, noun);
+  vm.set(2, verb);
 
-  for i in (0..opcodes.len()).step_by(4) {
-    match opcodes[i] {
-      1 => {
-        let a = opcodes[i + 1];
-        let b = opcodes[i + 2];
-        let addr = opcodes[i + 3];
-        opcodes[addr] = opcodes[a] + opcodes[b]
-      }
-      2 => {
-        let a = opcodes[i + 1];
-        let b = opcodes[i + 2];
-        let addr = opcodes[i + 3];
-        opcodes[addr] = opcodes[a] * opcodes[b]
-      }
-      99 => break,
-      n => panic!("unimplemented opcode: {}", n),
-    }
-  }
+  vm.run();
 
-  opcodes[0]
+  vm.at(0)
 }
 
 fn solve_01(opcodes: &mut [usize]) -> usize {
@@ -34,7 +20,7 @@ fn solve_02(opcodes: &[usize]) -> usize {
       let mut op = opcodes.to_vec();
       let res = run(&mut op, noun, verb);
 
-      if res == 1969_0720 {
+      if res == 19_690_720 {
         return 100 * noun + verb;
       }
     }
@@ -43,12 +29,12 @@ fn solve_02(opcodes: &[usize]) -> usize {
   0
 }
 
-fn to_opcodes(input: &str) -> Vec<usize> {
+fn load_initial_memory(input: &str) -> Vec<usize> {
   input.split(',').flat_map(|c| c.parse()).collect()
 }
 
 pub fn solve(input: &str) {
-  let orig = to_opcodes(input);
+  let orig = load_initial_memory(input);
 
   let mut o = orig.clone();
   let res = solve_01(&mut o);
@@ -64,17 +50,17 @@ mod tests {
   use super::*;
   #[test]
   fn part_one() {
-    let mut ops = to_opcodes("1,9,10,3,2,3,11,0,99,30,40,50");
+    let mut ops = load_initial_memory("1,9,10,3,2,3,11,0,99,30,40,50");
     let res = run(&mut ops, 9, 10);
 
     assert_eq!(res, 3500);
 
-    let mut ops = to_opcodes("1,1,1,4,99,5,6,0,99");
+    let mut ops = load_initial_memory("1,1,1,4,99,5,6,0,99");
     let res = run(&mut ops, 1, 1);
 
     assert_eq!(res, 30);
 
-    let mut ops = to_opcodes("1,0,0,0,99");
+    let mut ops = load_initial_memory("1,0,0,0,99");
     let res = run(&mut ops, 0, 0);
 
     assert_eq!(res, 2);
