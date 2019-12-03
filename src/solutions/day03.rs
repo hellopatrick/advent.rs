@@ -8,6 +8,7 @@ enum Dir {
   Right,
 }
 
+// in real world, we'd use TryFrom, but no malformed inputs here.
 impl From<char> for Dir {
   fn from(c: char) -> Self {
     match c {
@@ -29,7 +30,7 @@ struct Step {
 type Coordinate = (isize, isize);
 
 impl Step {
-  pub fn dp(&self) -> Coordinate {
+  pub fn delta_coord(&self) -> Coordinate {
     match self.dir {
       Dir::Up => (0, 1),
       Dir::Down => (0, -1),
@@ -41,12 +42,8 @@ impl Step {
 
 impl From<&str> for Step {
   fn from(s: &str) -> Self {
-    let dir: Dir = s.chars().take(1).next().expect("must exist").into();
-    let len = s
-      .get(1..)
-      .expect("must exist")
-      .parse()
-      .expect("must be number");
+    let dir: Dir = s.chars().take(1).next().unwrap().into();
+    let len = s.get(1..).unwrap().parse().unwrap();
 
     Self { dir, len }
   }
@@ -59,7 +56,7 @@ fn path(route: &[Step]) -> HashMap<(isize, isize), isize> {
   let (mut x, mut y) = (0, 0);
 
   for dir in route {
-    let (dx, dy) = dir.dp();
+    let (dx, dy) = dir.delta_coord();
 
     for _ in 0..dir.len {
       x += dx;
@@ -73,11 +70,11 @@ fn path(route: &[Step]) -> HashMap<(isize, isize), isize> {
   map
 }
 
-fn manhattan_distance(coord: (isize, isize)) -> isize {
+fn manhattan_distance(coord: Coordinate) -> isize {
   coord.0.abs() + coord.1.abs()
 }
 
-fn solve_01(routes: Vec<Vec<Step>>) -> isize {
+fn solve_01(routes: &[Vec<Step>]) -> isize {
   let path_one = path(&routes[0]);
   let path_two = path(&routes[1]);
 
@@ -88,10 +85,10 @@ fn solve_01(routes: Vec<Vec<Step>>) -> isize {
   intersections
     .map(|x| manhattan_distance(**x))
     .min()
-    .expect("intersection")
+    .unwrap()
 }
 
-fn solve_02(routes: Vec<Vec<Step>>) -> isize {
+fn solve_02(routes: &[Vec<Step>]) -> isize {
   let path_one = path(&routes[0]);
   let path_two = path(&routes[1]);
 
@@ -99,20 +96,10 @@ fn solve_02(routes: Vec<Vec<Step>>) -> isize {
   let set_two: HashSet<_> = path_two.keys().collect();
   let intersections = set_one.intersection(&set_two);
 
-  let mut min = std::isize::MAX;
-
-  for intersection in intersections {
-    let len_one = path_one.get(*intersection).expect("must be here");
-    let len_two = path_two.get(*intersection).expect("must be here");
-
-    let total = len_one + len_two;
-
-    if total < min {
-      min = total;
-    }
-  }
-
-  min
+  intersections
+    .map(|x| path_one.get(*x).unwrap() + path_two.get(*x).unwrap())
+    .min()
+    .unwrap()
 }
 
 fn parse(input: &str) -> Vec<Vec<Step>> {
@@ -125,15 +112,8 @@ fn parse(input: &str) -> Vec<Vec<Step>> {
 pub fn solve(input: &str) {
   let instructions = parse(input);
 
-  let res = solve_01(instructions);
-
-  println!("{}", res);
-
-  let instructions = parse(input);
-
-  let res = solve_02(instructions);
-
-  println!("{}", res);
+  println!("part one: {}", solve_01(&instructions));
+  println!("part two: {}", solve_02(&instructions));
 }
 
 #[cfg(test)]
@@ -146,7 +126,7 @@ mod tests {
       U98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
     );
 
-    let res = solve_01(input);
+    let res = solve_01(&input);
 
     assert_eq!(res, 135);
   }
@@ -158,7 +138,7 @@ mod tests {
       U98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
     );
 
-    let res = solve_02(input);
+    let res = solve_02(&input);
 
     assert_eq!(res, 410);
   }
