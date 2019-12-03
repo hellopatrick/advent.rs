@@ -49,7 +49,7 @@ impl From<&str> for Step {
   }
 }
 
-fn path(route: &[Step]) -> HashMap<(isize, isize), isize> {
+fn path(route: &[Step]) -> HashMap<Coordinate, isize> {
   let mut map = HashMap::new();
   let mut len = 1;
 
