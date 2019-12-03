@@ -140,7 +140,7 @@ pub fn solve(input: &str) {
 mod tests {
   use super::*;
   #[test]
-  fn test_part_one() {
+  fn part_one() {
     let input = parse(
       "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
       U98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
@@ -149,5 +149,17 @@ mod tests {
     let res = solve_01(input);
 
     assert_eq!(res, 135);
+  }
+
+  #[test]
+  fn part_two() {
+    let input = parse(
+      "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51
+      U98,R91,D20,R16,D67,R40,U7,R15,U6,R7",
+    );
+
+    let res = solve_02(input);
+
+    assert_eq!(res, 410);
   }
 }
