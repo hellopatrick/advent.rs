@@ -1,7 +1,7 @@
 use crate::solutions::intcode::*;
 
-fn run(opcodes: &mut [usize], noun: usize, verb: usize) -> usize {
-  let mut vm = VM::with(opcodes);
+fn run(mem: &[usize], noun: usize, verb: usize) -> usize {
+  let mut vm = VM::with(mem);
   vm.set(1, noun);
   vm.set(2, verb);
 
@@ -10,15 +10,14 @@ fn run(opcodes: &mut [usize], noun: usize, verb: usize) -> usize {
   vm.at(0)
 }
 
-fn solve_01(opcodes: &mut [usize]) -> usize {
-  run(opcodes, 12, 2)
+fn solve_01(memory: &[usize]) -> usize {
+  run(memory, 12, 2)
 }
 
-fn solve_02(opcodes: &[usize]) -> usize {
+fn solve_02(memory: &[usize]) -> usize {
   for noun in 0..100 {
     for verb in 0..100 {
-      let mut op = opcodes.to_vec();
-      let res = run(&mut op, noun, verb);
+      let res = run(&memory, noun, verb);
 
       if res == 19_690_720 {
         return 100 * noun + verb;
@@ -34,14 +33,12 @@ fn load_initial_memory(input: &str) -> Vec<usize> {
 }
 
 pub fn solve(input: &str) {
-  let orig = load_initial_memory(input);
+  let mem = load_initial_memory(input);
 
-  let mut o = orig.clone();
-  let res = solve_01(&mut o);
+  let res = solve_01(&mem);
   println!("part 01: {}", res);
 
-  let o = orig.clone();
-  let res = solve_02(&o);
+  let res = solve_02(&mem);
   println!("part 02: {}", res);
 }
 
