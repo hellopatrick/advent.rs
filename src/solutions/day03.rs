@@ -1,11 +1,24 @@
 use std::collections::{HashMap, HashSet};
 
+type Coordinate = (isize, isize);
+
 #[derive(Debug)]
 enum Dir {
   Up,
   Down,
   Left,
   Right,
+}
+
+impl Dir {
+  pub fn delta(&self) -> Coordinate {
+    match self {
+      Dir::Up => (0, 1),
+      Dir::Down => (0, -1),
+      Dir::Left => (-1, 0),
+      Dir::Right => (1, 0),
+    }
+  }
 }
 
 // in real world, we'd use TryFrom, but no malformed inputs here.
@@ -27,19 +40,6 @@ struct Step {
   len: isize,
 }
 
-type Coordinate = (isize, isize);
-
-impl Step {
-  pub fn delta_coord(&self) -> Coordinate {
-    match self.dir {
-      Dir::Up => (0, 1),
-      Dir::Down => (0, -1),
-      Dir::Left => (-1, 0),
-      Dir::Right => (1, 0),
-    }
-  }
-}
-
 impl From<&str> for Step {
   fn from(s: &str) -> Self {
     let dir: Dir = s.chars().take(1).next().unwrap().into();
@@ -55,10 +55,10 @@ fn path(route: &[Step]) -> HashMap<(isize, isize), isize> {
 
   let (mut x, mut y) = (0, 0);
 
-  for dir in route {
-    let (dx, dy) = dir.delta_coord();
+  for step in route {
+    let (dx, dy) = step.dir.delta();
 
-    for _ in 0..dir.len {
+    for _ in 0..step.len {
       x += dx;
       y += dy;
 
