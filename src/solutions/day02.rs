@@ -47,18 +47,18 @@ mod tests {
   use super::*;
   #[test]
   fn part_one() {
-    let mut ops = load_initial_memory("1,9,10,3,2,3,11,0,99,30,40,50");
-    let res = run(&mut ops, 9, 10);
+    let ops = load_initial_memory("1,9,10,3,2,3,11,0,99,30,40,50");
+    let res = run(&ops, 9, 10);
 
     assert_eq!(res, 3500);
 
-    let mut ops = load_initial_memory("1,1,1,4,99,5,6,0,99");
-    let res = run(&mut ops, 1, 1);
+    let ops = load_initial_memory("1,1,1,4,99,5,6,0,99");
+    let res = run(&ops, 1, 1);
 
     assert_eq!(res, 30);
 
-    let mut ops = load_initial_memory("1,0,0,0,99");
-    let res = run(&mut ops, 0, 0);
+    let ops = load_initial_memory("1,0,0,0,99");
+    let res = run(&ops, 0, 0);
 
     assert_eq!(res, 2);
   }
