@@ -37,7 +37,7 @@ impl From<char> for Dir {
 #[derive(Debug)]
 struct Step {
   dir: Dir,
-  len: isize,
+  len: usize,
 }
 
 impl From<&str> for Step {
