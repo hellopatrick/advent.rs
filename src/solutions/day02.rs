@@ -1,20 +1,20 @@
 use crate::solutions::intcode::*;
 
-fn run(mem: &[usize], noun: usize, verb: usize) -> usize {
+fn run(mem: &[isize], noun: isize, verb: isize) -> isize {
   let mut vm = VM::with(mem);
-  vm.set(1, noun);
-  vm.set(2, verb);
+  vm.set(Parameter::Position(1), noun);
+  vm.set(Parameter::Position(2), verb);
 
   vm.run();
 
-  vm.at(0)
+  vm.at(Parameter::Position(0))
 }
 
-fn solve_01(memory: &[usize]) -> usize {
+fn solve_01(memory: &[isize]) -> isize {
   run(memory, 12, 2)
 }
 
-fn solve_02(memory: &[usize]) -> usize {
+fn solve_02(memory: &[isize]) -> isize {
   for noun in 0..100 {
     for verb in 0..100 {
       let res = run(&memory, noun, verb);
@@ -28,7 +28,7 @@ fn solve_02(memory: &[usize]) -> usize {
   0
 }
 
-fn load_initial_memory(input: &str) -> Vec<usize> {
+fn load_initial_memory(input: &str) -> Vec<isize> {
   input.split(',').flat_map(|c| c.parse()).collect()
 }
 
