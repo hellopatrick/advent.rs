@@ -5,16 +5,16 @@ pub struct VM {
 }
 
 #[derive(Debug)]
-pub enum Parameter {
+pub enum Address {
   Position(isize),
   Immediate(isize),
 }
 
-impl From<(isize, isize)> for Parameter {
-  fn from((mode, value): (isize, isize)) -> Parameter {
+impl From<(isize, isize)> for Address {
+  fn from((mode, value): (isize, isize)) -> Address {
     match mode {
-      0 => Parameter::Position(value),
-      1 => Parameter::Immediate(value),
+      0 => Address::Position(value),
+      1 => Address::Immediate(value),
       _ => unreachable!(),
     }
   }
@@ -23,14 +23,14 @@ impl From<(isize, isize)> for Parameter {
 #[derive(Debug)]
 pub enum Instruction {
   Halt,
-  Add(Parameter, Parameter, Parameter),
-  Multiply(Parameter, Parameter, Parameter),
-  Input(Parameter),
-  Output(Parameter),
-  JumpNZ(Parameter, Parameter),
-  JumpZ(Parameter, Parameter),
-  IfLess(Parameter, Parameter, Parameter),
-  IfEqual(Parameter, Parameter, Parameter),
+  Add(Address, Address, Address),
+  Multiply(Address, Address, Address),
+  Input(Address),
+  Output(Address),
+  JumpNZ(Address, Address),
+  JumpZ(Address, Address),
+  IfLess(Address, Address, Address),
+  IfEqual(Address, Address, Address),
   Unknown(isize),
 }
 
@@ -104,17 +104,17 @@ impl VM {
     }
   }
 
-  pub fn at(&self, idx: Parameter) -> isize {
+  pub fn at(&self, idx: Address) -> isize {
     match idx {
-      Parameter::Immediate(v) => v,
-      Parameter::Position(p) => self.memory[p as usize],
+      Address::Immediate(v) => v,
+      Address::Position(p) => self.memory[p as usize],
     }
   }
 
-  pub fn set(&mut self, idx: Parameter, val: isize) {
+  pub fn set(&mut self, idx: Address, val: isize) {
     match idx {
-      Parameter::Immediate(v) => self.memory[v as usize] = val,
-      Parameter::Position(p) => self.memory[p as usize] = val,
+      Address::Immediate(v) => self.memory[v as usize] = val,
+      Address::Position(p) => self.memory[p as usize] = val,
     };
   }
 

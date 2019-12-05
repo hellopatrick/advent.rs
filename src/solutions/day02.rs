@@ -2,12 +2,12 @@ use crate::solutions::intcode::*;
 
 fn run(mem: &[isize], noun: isize, verb: isize) -> isize {
   let mut vm = VM::with(mem);
-  vm.set(Parameter::Position(1), noun);
-  vm.set(Parameter::Position(2), verb);
+  vm.set(Address::Position(1), noun);
+  vm.set(Address::Position(2), verb);
 
   vm.run();
 
-  vm.at(Parameter::Position(0))
+  vm.at(Address::Position(0))
 }
 
 fn solve_01(memory: &[isize]) -> isize {
