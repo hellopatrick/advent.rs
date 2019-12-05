@@ -1,7 +1,7 @@
-use crate::solutions::intcode::*;
+use crate::intcode::*;
 
 fn run(mem: &[isize], noun: isize, verb: isize) -> isize {
-  let mut vm = VM::with(mem);
+  let mut vm = VM::new(mem);
   vm.set(Address::Position(1), noun);
   vm.set(Address::Position(2), verb);
 

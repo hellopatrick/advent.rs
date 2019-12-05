@@ -52,7 +52,7 @@ impl Instruction {
 }
 
 impl VM {
-  pub fn with(memory: &[isize]) -> Self {
+  pub fn new(memory: &[isize]) -> Self {
     Self {
       memory: memory.to_vec(),
       ip: 0,
@@ -65,8 +65,8 @@ impl VM {
     let op = i % 100;
 
     let mode_one = (i / 100) % 10;
-    let mode_two = (i / 1000) % 10;
-    let mode_three = (i / 10000) % 10;
+    let mode_two = (i / 1_000) % 10;
+    let mode_three = (i / 10_000) % 10;
 
     match op {
       1 => Instruction::Add(
