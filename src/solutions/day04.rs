@@ -1,14 +1,40 @@
 use std::collections::HashMap;
 
+fn is_sorted<T: PartialOrd>(slice: &[T]) -> bool {
+  if slice.is_empty() {
+    return true;
+  }
+
+  let mut last = &slice[0];
+
+  for i in slice {
+    if i < last {
+      return false;
+    }
+    last = i;
+  }
+
+  true
+}
+
+fn digits(i: usize) -> Vec<usize> {
+  let mut m = Vec::with_capacity(6);
+
+  let mut n = i;
+  while n > 0 {
+    m.push(n % 10);
+    n /= 10;
+  }
+
+  m.reverse();
+
+  m
+}
+
 fn check_01(i: usize) -> bool {
-  let i = format!("{}", i);
+  let v: Vec<_> = digits(i);
 
-  let v: Vec<_> = i.chars().collect();
-
-  let mut s = v.clone();
-  s.sort();
-
-  if v == s {
+  if is_sorted(&v) {
     let mut h = HashMap::new();
 
     for c in v {
@@ -22,21 +48,11 @@ fn check_01(i: usize) -> bool {
 }
 
 fn solve_01(range: std::ops::RangeInclusive<usize>) -> usize {
-  let mut count = 0;
-
-  for i in range {
-    if check_01(i) {
-      count += 1;
-    }
-  }
-
-  count
+  range.filter(|&i| check_01(i)).count()
 }
 
 fn check_02(i: usize) -> bool {
-  let i = format!("{}", i);
-
-  let v: Vec<_> = i.chars().collect();
+  let v: Vec<_> = digits(i);
 
   let mut s = v.clone();
   s.sort();
@@ -55,15 +71,7 @@ fn check_02(i: usize) -> bool {
 }
 
 fn solve_02(range: std::ops::RangeInclusive<usize>) -> usize {
-  let mut count = 0;
-
-  for i in range {
-    if check_02(i) {
-      count += 1;
-    }
-  }
-
-  count
+  range.filter(|&i| check_02(i)).count()
 }
 
 pub fn solve(_: &str) {
