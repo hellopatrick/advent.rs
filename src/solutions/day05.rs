@@ -10,17 +10,3 @@ pub fn solve(input: &str) {
   let mut vm = VM::new(&mem, "1\n".as_bytes());
   vm.run();
 }
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn part_one() {
-    let input = include_str!("../../inputs/day05.txt");
-    let mem = load_initial_memory(input);
-
-    let mut vm = VM::new(&mem, "1\n".as_bytes());
-    vm.run();
-  }
-}
