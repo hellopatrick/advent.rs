@@ -1,7 +1,11 @@
+use std::io;
+use std::io::prelude::*;
+
 #[derive(Debug)]
-pub struct VM {
+pub struct VM<R: BufRead> {
   memory: Vec<isize>,
-  pub ip: usize,
+  ip: usize,
+  reader: R,
 }
 
 #[derive(Debug)]
@@ -51,11 +55,12 @@ impl Instruction {
   }
 }
 
-impl VM {
-  pub fn new(memory: &[isize]) -> Self {
+impl<R: BufRead> VM<R> {
+  pub fn new(memory: &[isize], reader: R) -> Self {
     Self {
       memory: memory.to_vec(),
       ip: 0,
+      reader,
     }
   }
 
@@ -136,14 +141,11 @@ impl VM {
           self.set(c, a + b);
         }
         Instruction::Input(a) => {
-          use std::io;
-          use std::io::Write;
-
           let mut input = String::new();
           print!("> ");
           io::stdout().flush().expect("flushed");
-          io::stdin().read_line(&mut input).unwrap();
-          let n: isize = input.trim().parse().unwrap();
+          self.reader.read_line(&mut input).unwrap();
+          let n = input.trim().parse().unwrap();
 
           self.set(a, n);
         }

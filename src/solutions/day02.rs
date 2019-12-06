@@ -1,7 +1,8 @@
 use crate::intcode::*;
 
 fn run(mem: &[isize], noun: isize, verb: isize) -> isize {
-  let mut vm = VM::new(mem);
+  let stdin = std::io::stdin();
+  let mut vm = VM::new(mem, stdin.lock());
   vm.set(Address::Position(1), noun);
   vm.set(Address::Position(2), verb);
 
