@@ -29,6 +29,7 @@ pub fn main() {
     3 => solutions::day03::solve,
     4 => solutions::day04::solve,
     5 => solutions::day05::solve,
+    6 => solutions::day06::solve,
     _ => not_implemented,
   };
 
