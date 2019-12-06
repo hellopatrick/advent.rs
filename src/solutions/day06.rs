@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
-pub fn to_graph(input: &str) -> HashMap<&str, &str> {
+fn to_graph(input: &str) -> HashMap<&str, &str> {
   input
     .lines()
     .map(|line| {
@@ -14,40 +14,25 @@ pub fn to_graph(input: &str) -> HashMap<&str, &str> {
     .collect()
 }
 
-pub fn count_orbits(key: &str, graph: &HashMap<&str, &str>) -> usize {
-  if key == "COM" {
-    0
-  } else {
-    let v = graph.get(key).unwrap();
-
-    1 + count_orbits(*v, graph)
-  }
+fn path_to_root<'a>(key: &'a str, graph: &'a HashMap<&str, &str>) -> Vec<&'a str> {
+  std::iter::successors(Some(key), |k| graph.get(*k).copied()).collect()
 }
 
-pub fn solve_01(graph: &HashMap<&str, &str>) -> usize {
-  graph.keys().map(|key| count_orbits(key, graph)).sum()
+fn solve_01(graph: &HashMap<&str, &str>) -> usize {
+  graph
+    .keys()
+    .map(|key| path_to_root(key, graph).len() - 1)
+    .sum()
 }
 
-pub fn solve_02(graph: &HashMap<&str, &str>) -> usize {
-  let mut ptr = *graph.get("YOU").unwrap();
+fn solve_02(graph: &HashMap<&str, &str>) -> usize {
+  let me = path_to_root("YOU", graph);
+  let santa = path_to_root("SAN", graph);
 
-  let mut path_to_com = Vec::new();
+  let me: HashSet<_> = me.iter().collect();
+  let santa: HashSet<_> = santa.iter().collect();
 
-  while ptr != "COM" {
-    path_to_com.push(ptr);
-    ptr = *graph.get(ptr).unwrap();
-  }
-
-  let mut ptr = *graph.get("SAN").unwrap();
-
-  let mut hops_to_path = 0;
-
-  while !path_to_com.contains(&ptr) {
-    hops_to_path += 1;
-    ptr = *graph.get(ptr).unwrap();
-  }
-
-  path_to_com.iter().position(|&c| c == ptr).unwrap() + hops_to_path
+  me.symmetric_difference(&santa).count() - 2
 }
 
 pub fn solve(input: &str) {
