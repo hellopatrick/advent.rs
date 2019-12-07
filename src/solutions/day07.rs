@@ -158,5 +158,15 @@ mod tests {
     let res = run_02(&mem, &inputs);
 
     assert_eq!(res, 18_216);
+
+    let mem = load_initial_memory(
+      "3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,
+      27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5",
+    );
+    let inputs = vec![9, 8, 7, 6, 5];
+
+    let res = run_02(&mem, &inputs);
+
+    assert_eq!(res, 139_629_729);
   }
 }
