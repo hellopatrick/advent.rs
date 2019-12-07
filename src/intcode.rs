@@ -1,11 +1,14 @@
-use std::io;
-use std::io::prelude::*;
+use std::sync::mpsc::*;
 
 #[derive(Debug)]
-pub struct VM<R: BufRead> {
-  memory: Vec<isize>,
-  ip: usize,
-  reader: R,
+pub struct VM {
+  pub memory: Vec<isize>,
+  pub ip: usize,
+  pub input: Sender<isize>,
+  pub reader: Receiver<isize>,
+  pub output: Receiver<isize>,
+  pub writer: Sender<isize>,
+  pub last_output: isize,
 }
 
 #[derive(Debug)]
@@ -55,12 +58,19 @@ impl Instruction {
   }
 }
 
-impl<R: BufRead> VM<R> {
-  pub fn new(memory: &[isize], reader: R) -> Self {
+impl VM {
+  pub fn new(memory: &[isize]) -> Self {
+    let (input, reader) = channel();
+    let (writer, output) = channel();
+
     Self {
       memory: memory.to_vec(),
       ip: 0,
+      last_output: 0,
+      input,
       reader,
+      output,
+      writer,
     }
   }
 
@@ -127,6 +137,7 @@ impl<R: BufRead> VM<R> {
     loop {
       let op = self.op();
       let arity = op.arity();
+
       match op {
         Instruction::Unknown(n) => panic!("unimplemented opcode: {}", n),
         Instruction::Halt => break,
@@ -141,15 +152,14 @@ impl<R: BufRead> VM<R> {
           self.set(c, a + b);
         }
         Instruction::Input(a) => {
-          let mut input = String::new();
-          print!("> ");
-          io::stdout().flush().expect("flushed");
-          self.reader.read_line(&mut input).unwrap();
-          let n = input.trim().parse().unwrap();
-
+          let n = self.reader.recv().unwrap();
           self.set(a, n);
         }
-        Instruction::Output(a) => println!("{}", self.at(a)),
+        Instruction::Output(a) => {
+          let a = self.at(a);
+          self.last_output = a;
+          self.writer.send(a).unwrap_or_default();
+        }
         Instruction::JumpNZ(a, b) => {
           let a = self.at(a);
           let b = self.at(b);
