@@ -117,7 +117,7 @@ mod tests {
       last = run(&mem, i, last);
     }
 
-    assert_eq!(last, 43210);
+    assert_eq!(last, 43_210);
 
     let mem = load_initial_memory(
       "3,23,3,24,1002,24,10,24,1002,23,
@@ -130,7 +130,7 @@ mod tests {
       last = run(&mem, i, last);
     }
 
-    assert_eq!(last, 54321);
+    assert_eq!(last, 54_321);
 
     let mem = load_initial_memory(
       "3,31,3,32,1002,32,10,32,1001,31,-2,31,1007,
@@ -143,7 +143,7 @@ mod tests {
       last = run(&mem, i, last);
     }
 
-    assert_eq!(last, 65210);
+    assert_eq!(last, 65_210);
   }
 
   #[test]
