@@ -2,25 +2,6 @@ use crate::intcode::*;
 use itertools::*;
 use std::thread;
 
-fn run(mem: &[isize], first: isize, second: isize) -> isize {
-  let mut vm = VM::new(mem);
-
-  vm.input.send(first).unwrap();
-  vm.input.send(second).unwrap();
-
-  vm.run();
-
-  vm.last_output
-}
-
-fn solve_01(mem: &[isize]) -> isize {
-  (0..5)
-    .permutations(5)
-    .map(|permutation| permutation.iter().fold(0, |acc, &next| run(mem, next, acc)))
-    .max()
-    .expect("has a max")
-}
-
 fn connect(a: &mut VM, b: &mut VM) {
   use std::sync::mpsc::*;
 
@@ -28,6 +9,62 @@ fn connect(a: &mut VM, b: &mut VM) {
   a.writer = tx.clone();
   b.input = tx.clone();
   b.reader = rx;
+}
+
+fn run_01(mem: &[isize], initial: &[isize]) -> isize {
+  let mut vm_01 = VM::new(mem);
+  let mut vm_02 = VM::new(mem);
+  let mut vm_03 = VM::new(mem);
+  let mut vm_04 = VM::new(mem);
+  let mut vm_05 = VM::new(mem);
+
+  connect(&mut vm_01, &mut vm_02);
+  connect(&mut vm_02, &mut vm_03);
+  connect(&mut vm_03, &mut vm_04);
+  connect(&mut vm_04, &mut vm_05);
+
+  vm_01.input.send(initial[0]).unwrap();
+  vm_01.input.send(0).unwrap();
+
+  vm_02.input.send(initial[1]).unwrap();
+  vm_03.input.send(initial[2]).unwrap();
+  vm_04.input.send(initial[3]).unwrap();
+  vm_05.input.send(initial[4]).unwrap();
+
+  thread::spawn(move || {
+    vm_01.run();
+    vm_01.last_output
+  });
+
+  thread::spawn(move || {
+    vm_02.run();
+    vm_02.last_output
+  });
+
+  thread::spawn(move || {
+    vm_03.run();
+    vm_03.last_output
+  });
+
+  thread::spawn(move || {
+    vm_04.run();
+    vm_04.last_output
+  });
+
+  let fifth = thread::spawn(move || {
+    vm_05.run();
+    vm_05.last_output
+  });
+
+  fifth.join().unwrap()
+}
+
+fn solve_01(mem: &[isize]) -> isize {
+  (0..5)
+    .permutations(5)
+    .map(|permutation| run_01(mem, &permutation))
+    .max()
+    .expect("has a max")
 }
 
 fn run_02(mem: &[isize], initial: &[isize]) -> isize {
@@ -111,12 +148,7 @@ mod tests {
   fn part_one() {
     let mem = load_initial_memory("3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0");
     let inputs = vec![4, 3, 2, 1, 0];
-    let mut last = 0;
-
-    for i in inputs {
-      last = run(&mem, i, last);
-    }
-
+    let last = run_01(&mem, &inputs);
     assert_eq!(last, 43_210);
 
     let mem = load_initial_memory(
@@ -124,11 +156,7 @@ mod tests {
       -1,23,101,5,23,23,1,24,23,23,4,23,99,0,0",
     );
     let inputs = vec![0, 1, 2, 3, 4];
-    let mut last = 0;
-
-    for i in inputs {
-      last = run(&mem, i, last);
-    }
+    let last = run_01(&mem, &inputs);
 
     assert_eq!(last, 54_321);
 
@@ -137,11 +165,7 @@ mod tests {
       31,0,33,1002,33,7,33,1,33,31,31,1,32,31,31,4,31,99,0,0,0",
     );
     let inputs = vec![1, 0, 4, 3, 2];
-    let mut last = 0;
-
-    for i in inputs {
-      last = run(&mem, i, last);
-    }
+    let last = run_01(&mem, &inputs);
 
     assert_eq!(last, 65_210);
   }
