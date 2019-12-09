@@ -31,30 +31,15 @@ fn run_01(mem: &[isize], initial: &[isize]) -> isize {
   vm_04.input.send(initial[3]).unwrap();
   vm_05.input.send(initial[4]).unwrap();
 
-  thread::spawn(move || {
-    vm_01.run();
-    vm_01.last_output
-  });
+  thread::spawn(move || vm_01.run());
 
-  thread::spawn(move || {
-    vm_02.run();
-    vm_02.last_output
-  });
+  thread::spawn(move || vm_02.run());
 
-  thread::spawn(move || {
-    vm_03.run();
-    vm_03.last_output
-  });
+  thread::spawn(move || vm_03.run());
 
-  thread::spawn(move || {
-    vm_04.run();
-    vm_04.last_output
-  });
+  thread::spawn(move || vm_04.run());
 
-  let fifth = thread::spawn(move || {
-    vm_05.run();
-    vm_05.last_output
-  });
+  let fifth = thread::spawn(move || vm_05.run());
 
   fifth.join().unwrap()
 }
@@ -88,30 +73,15 @@ fn run_02(mem: &[isize], initial: &[isize]) -> isize {
   vm_04.input.send(initial[3]).unwrap();
   vm_05.input.send(initial[4]).unwrap();
 
-  thread::spawn(move || {
-    vm_01.run();
-    vm_01.last_output
-  });
+  thread::spawn(move || vm_01.run());
 
-  thread::spawn(move || {
-    vm_02.run();
-    vm_02.last_output
-  });
+  thread::spawn(move || vm_02.run());
 
-  thread::spawn(move || {
-    vm_03.run();
-    vm_03.last_output
-  });
+  thread::spawn(move || vm_03.run());
 
-  thread::spawn(move || {
-    vm_04.run();
-    vm_04.last_output
-  });
+  thread::spawn(move || vm_04.run());
 
-  let fifth = thread::spawn(move || {
-    vm_05.run();
-    vm_05.last_output
-  });
+  let fifth = thread::spawn(move || vm_05.run());
 
   fifth.join().unwrap()
 }
