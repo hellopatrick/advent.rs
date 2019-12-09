@@ -9,7 +9,6 @@ pub struct VM {
   pub reader: Receiver<isize>,
   pub output: Receiver<isize>,
   pub writer: Sender<isize>,
-  pub last_output: isize,
 }
 
 #[derive(PartialEq, Debug, Copy, Clone)]
@@ -75,7 +74,6 @@ impl VM {
       memory,
       ip: 0,
       sp: 0,
-      last_output: 0,
       input,
       reader,
       output,
@@ -146,6 +144,8 @@ impl VM {
   }
 
   pub fn run(&mut self) -> isize {
+    let mut latest_output = 0;
+
     loop {
       let op = self.op();
       let arity = op.arity();
@@ -168,7 +168,7 @@ impl VM {
         }
         Instruction::Output(a) => {
           let a = self.at(a);
-          self.last_output = a;
+          latest_output = a;
           self.writer.send(a).unwrap_or_default();
         }
         Instruction::JumpNZ(a, b) => {
@@ -208,7 +208,7 @@ impl VM {
       self.ip += arity;
     }
 
-    self.last_output
+    latest_output
   }
 }
 
