@@ -32,16 +32,10 @@ fn run_01(mem: &[isize], initial: &[isize]) -> isize {
   vm_05.input.send(initial[4]).unwrap();
 
   thread::spawn(move || vm_01.run());
-
   thread::spawn(move || vm_02.run());
-
   thread::spawn(move || vm_03.run());
-
   thread::spawn(move || vm_04.run());
-
-  let fifth = thread::spawn(move || vm_05.run());
-
-  fifth.join().unwrap()
+  thread::spawn(move || vm_05.run()).join().unwrap()
 }
 
 fn solve_01(mem: &[isize]) -> isize {
@@ -74,16 +68,10 @@ fn run_02(mem: &[isize], initial: &[isize]) -> isize {
   vm_05.input.send(initial[4]).unwrap();
 
   thread::spawn(move || vm_01.run());
-
   thread::spawn(move || vm_02.run());
-
   thread::spawn(move || vm_03.run());
-
   thread::spawn(move || vm_04.run());
-
-  let fifth = thread::spawn(move || vm_05.run());
-
-  fifth.join().unwrap()
+  thread::spawn(move || vm_05.run()).join().unwrap()
 }
 
 fn solve_02(mem: &[isize]) -> isize {
@@ -101,13 +89,8 @@ fn load_initial_memory(input: &str) -> Vec<isize> {
 pub fn solve(input: &str) {
   let mem = load_initial_memory(input);
 
-  let res = solve_01(&mem);
-
-  println!("part one: {}", res);
-
-  let res = solve_02(&mem);
-
-  println!("part two: {}", res);
+  dbg!(solve_01(&mem));
+  dbg!(solve_02(&mem));
 }
 
 #[cfg(test)]
