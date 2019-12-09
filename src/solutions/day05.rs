@@ -9,15 +9,15 @@ pub fn solve(input: &str) {
 
   let mut vm = VM::new(&mem);
   vm.input.send(1).unwrap();
-  vm.run();
+  let res = vm.run();
 
-  println!("part one: {}", vm.last_output);
+  println!("part one: {}", res);
 
   let mut vm = VM::new(&mem);
   vm.input.send(5).unwrap();
-  vm.run();
+  let res = vm.run();
 
-  println!("part two: {}", vm.last_output);
+  println!("part two: {}", res);
 }
 
 #[cfg(test)]
@@ -33,20 +33,20 @@ mod tests {
     );
     let mut vm = VM::new(&mem);
     vm.input.send(5).unwrap();
-    vm.run();
+    let res = vm.run();
 
-    assert_eq!(vm.last_output, 999);
+    assert_eq!(res, 999);
 
     let mut vm = VM::new(&mem);
     vm.input.send(8).unwrap();
-    vm.run();
+    let res = vm.run();
 
-    assert_eq!(vm.last_output, 1000);
+    assert_eq!(res, 1000);
 
     let mut vm = VM::new(&mem);
     vm.input.send(13).unwrap();
-    vm.run();
+    let res = vm.run();
 
-    assert_eq!(vm.last_output, 1001);
+    assert_eq!(res, 1001);
   }
 }

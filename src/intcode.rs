@@ -145,7 +145,7 @@ impl VM {
     };
   }
 
-  pub fn run(&mut self) {
+  pub fn run(&mut self) -> isize {
     loop {
       let op = self.op();
       let arity = op.arity();
@@ -207,5 +207,7 @@ impl VM {
       }
       self.ip += arity;
     }
+
+    self.last_output
   }
 }

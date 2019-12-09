@@ -9,16 +9,16 @@ pub fn solve(input: &str) {
   let mut vm = VM::new(&mem);
   vm.input.send(1).unwrap();
 
-  vm.run();
+  let part_one = vm.run();
 
-  dbg!(vm.last_output);
+  dbg!(part_one);
 
   let mut vm = VM::new(&mem);
   vm.input.send(2).unwrap();
 
-  vm.run();
+  let part_two = vm.run();
 
-  dbg!(vm.last_output);
+  dbg!(part_two);
 }
 
 #[cfg(test)]
@@ -28,27 +28,27 @@ mod tests {
   fn quine() {
     let mem = load_initial_memory("109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99");
     let mut vm = VM::new(&mem);
-    vm.run();
+    let res = vm.run();
 
     assert!(mem.iter().zip(vm.output.iter()).all(|(&a, b)| a == b));
-    assert_eq!(vm.last_output, 99);
+    assert_eq!(res, 99);
   }
 
   #[test]
   fn big_numbers() {
     let mem = load_initial_memory("104,1125899906842624,99");
     let mut vm = VM::new(&mem);
-    vm.run();
+    let res = vm.run();
 
-    assert_eq!(vm.last_output, 1_125_899_906_842_624);
+    assert_eq!(res, 1_125_899_906_842_624);
   }
 
   #[test]
   fn big_numbers_two() {
     let mem = load_initial_memory("1102,34915192,34915192,7,4,7,99,0");
     let mut vm = VM::new(&mem);
-    vm.run();
+    let res = vm.run();
 
-    assert_eq!(vm.last_output, 1_219_070_632_396_864);
+    assert_eq!(res, 1_219_070_632_396_864);
   }
 }
