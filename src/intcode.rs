@@ -211,3 +211,15 @@ impl VM {
     self.last_output
   }
 }
+
+impl From<&str> for VM {
+  fn from(input: &str) -> Self {
+    use itertools::Itertools;
+    let mem = input
+      .split(',')
+      .flat_map(|c| c.trim().parse())
+      .collect_vec();
+
+    Self::new(&mem)
+  }
+}
