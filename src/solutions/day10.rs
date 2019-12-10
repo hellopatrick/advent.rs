@@ -39,38 +39,33 @@ fn gcd(mut m: i32, mut n: i32) -> i32 {
   n.abs()
 }
 
-fn slope(from: Coordinate, to: Coordinate) -> Slope {
-  let dx = to.0 - from.0;
-  let dy = to.1 - from.1;
-
-  if dx == 0 && dy == 0 {
-    return Slope { dx, dy };
+impl Slope {
+  fn from(from: Coordinate, to: Coordinate) -> Slope {
+    let dx = to.0 - from.0;
+    let dy = to.1 - from.1;
+    if dx == 0 && dy == 0 {
+      return Slope { dx, dy };
+    }
+    let div = gcd(dx, dy);
+    Slope {
+      dx: dx / div,
+      dy: dy / div,
+    }
   }
 
-  let div = gcd(dx, dy);
-
-  Slope {
-    dx: dx / div,
-    dy: dy / div,
-  }
-}
-
-fn angle(slope: Slope) -> f32 {
-  use std::f32;
-
-  if slope.dx == 0 && slope.dy == 0 {
-    return 1_000_000.;
-  }
-
-  let dx = slope.dx as f32;
-  let dy = slope.dy as f32;
-
-  let ang = dy.atan2(dx).to_degrees();
-
-  if ang < -90. {
-    360. + ang
-  } else {
-    ang
+  fn angle(self) -> f32 {
+    use std::f32;
+    if self.dx == 0 && self.dy == 0 {
+      return 1_000_000.;
+    }
+    let dx = self.dx as f32;
+    let dy = self.dy as f32;
+    let ang = dy.atan2(dx).to_degrees();
+    if ang < -90. {
+      360. + ang
+    } else {
+      ang
+    }
   }
 }
 
@@ -85,7 +80,7 @@ fn solve_01(asteroids: &[Coordinate]) -> (usize, Coordinate) {
       (
         asteroids
           .iter()
-          .map(|to| slope(*from, *to))
+          .map(|to| Slope::from(*from, *to))
           .unique()
           .count()
           - 1,
@@ -100,7 +95,7 @@ fn solve_02(coord: Coordinate, asteroids: &[Coordinate]) -> Vec<(f32, Coordinate
   let mut map = asteroids
     .iter()
     .map(|ast| {
-      let sl = slope(coord, *ast);
+      let sl = Slope::from(coord, *ast);
       (sl, *ast)
     })
     .into_group_map();
@@ -108,7 +103,7 @@ fn solve_02(coord: Coordinate, asteroids: &[Coordinate]) -> Vec<(f32, Coordinate
   let mut res = map
     .iter_mut()
     .flat_map(|(s, points)| {
-      let ang = angle(*s);
+      let ang = s.angle();
       points.sort_by_key(|k| manhattan_dist(*k, coord));
 
       points
