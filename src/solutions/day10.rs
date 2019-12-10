@@ -1,6 +1,16 @@
 use itertools::Itertools;
 
+trait Distance<T> {
+  fn manhattan_distance(self, t: Self) -> T;
+}
+
 type Coordinate = (i32, i32);
+
+impl Distance<i32> for Coordinate {
+  fn manhattan_distance(self, to: Coordinate) -> i32 {
+    (self.0 - to.0).abs() + (self.1 - to.1).abs()
+  }
+}
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 struct Slope {
@@ -12,7 +22,7 @@ fn parse_input(input: &str) -> Vec<Coordinate> {
   input
     .lines()
     .enumerate()
-    .flat_map::<Vec<Coordinate>, _>(|(row, line)| {
+    .flat_map(|(row, line)| {
       line
         .trim()
         .chars()
@@ -24,9 +34,9 @@ fn parse_input(input: &str) -> Vec<Coordinate> {
             None
           }
         })
-        .collect()
+        .collect_vec()
     })
-    .collect()
+    .collect_vec()
 }
 
 fn gcd(mut m: i32, mut n: i32) -> i32 {
@@ -56,7 +66,7 @@ impl Slope {
   fn angle(self) -> f32 {
     use std::f32;
     if self.dx == 0 && self.dy == 0 {
-      return 1_000_000.;
+      return f32::INFINITY;
     }
     let dx = self.dx as f32;
     let dy = self.dy as f32;
@@ -67,10 +77,6 @@ impl Slope {
       ang
     }
   }
-}
-
-fn manhattan_dist(from: Coordinate, to: Coordinate) -> i32 {
-  (from.0 - to.0).abs() + (from.1 - to.1).abs()
 }
 
 fn solve_01(asteroids: &[Coordinate]) -> (usize, Coordinate) {
@@ -104,7 +110,7 @@ fn solve_02(coord: Coordinate, asteroids: &[Coordinate]) -> Vec<(f32, Coordinate
     .iter_mut()
     .flat_map(|(s, points)| {
       let ang = s.angle();
-      points.sort_by_key(|k| manhattan_dist(*k, coord));
+      points.sort_by_key(|k| k.manhattan_distance(coord));
 
       points
         .iter()
