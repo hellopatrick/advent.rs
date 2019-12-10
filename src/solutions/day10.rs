@@ -123,11 +123,10 @@ pub fn solve(input: &str) {
   let asteroids = parse_input(input);
 
   let (part_01, location) = solve_01(&asteroids);
-  dbg!(part_01, location);
+  dbg!(part_01);
 
   let res = solve_02(location, &asteroids);
   let (_, part_02) = res[199];
-
   dbg!(part_02);
 }
 
