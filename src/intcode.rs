@@ -2,13 +2,13 @@ use std::sync::mpsc::*;
 
 #[derive(Debug)]
 pub struct VM {
-  pub memory: Vec<isize>,
-  pub ip: usize,
-  pub sp: usize,
+  memory: Vec<isize>,
+  ip: usize,
+  sp: usize,
   pub input: Sender<isize>,
-  pub reader: Receiver<isize>,
+  reader: Receiver<isize>,
   pub output: Receiver<isize>,
-  pub writer: Sender<isize>,
+  writer: Sender<isize>,
 }
 
 #[derive(PartialEq, Debug, Copy, Clone)]
@@ -209,6 +209,15 @@ impl VM {
     }
 
     latest_output
+  }
+
+  pub fn pipe(&mut self, to: &mut Self) {
+    use std::sync::mpsc::*;
+
+    let (tx, rx) = channel();
+    self.writer = tx.clone();
+    to.input = tx.clone();
+    to.reader = rx;
   }
 }
 

@@ -2,15 +2,6 @@ use crate::intcode::*;
 use itertools::*;
 use std::thread;
 
-fn connect(a: &mut VM, b: &mut VM) {
-  use std::sync::mpsc::*;
-
-  let (tx, rx) = channel();
-  a.writer = tx.clone();
-  b.input = tx.clone();
-  b.reader = rx;
-}
-
 fn run_01(mem: &[isize], initial: &[isize]) -> isize {
   let mut vm_01 = VM::new(mem);
   let mut vm_02 = VM::new(mem);
@@ -18,10 +9,10 @@ fn run_01(mem: &[isize], initial: &[isize]) -> isize {
   let mut vm_04 = VM::new(mem);
   let mut vm_05 = VM::new(mem);
 
-  connect(&mut vm_01, &mut vm_02);
-  connect(&mut vm_02, &mut vm_03);
-  connect(&mut vm_03, &mut vm_04);
-  connect(&mut vm_04, &mut vm_05);
+  vm_01.pipe(&mut vm_02);
+  vm_02.pipe(&mut vm_03);
+  vm_03.pipe(&mut vm_04);
+  vm_04.pipe(&mut vm_05);
 
   vm_01.input.send(initial[0]).unwrap();
   vm_01.input.send(0).unwrap();
@@ -53,11 +44,11 @@ fn run_02(mem: &[isize], initial: &[isize]) -> isize {
   let mut vm_04 = VM::new(mem);
   let mut vm_05 = VM::new(mem);
 
-  connect(&mut vm_05, &mut vm_01);
-  connect(&mut vm_01, &mut vm_02);
-  connect(&mut vm_02, &mut vm_03);
-  connect(&mut vm_03, &mut vm_04);
-  connect(&mut vm_04, &mut vm_05);
+  vm_01.pipe(&mut vm_02);
+  vm_02.pipe(&mut vm_03);
+  vm_03.pipe(&mut vm_04);
+  vm_04.pipe(&mut vm_05);
+  vm_05.pipe(&mut vm_01);
 
   vm_01.input.send(initial[0]).unwrap();
   vm_01.input.send(0).unwrap();
