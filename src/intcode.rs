@@ -1,4 +1,4 @@
-use std::sync::mpsc::*;
+use crossbeam::crossbeam_channel::*;
 
 #[derive(Debug)]
 pub struct VM {
@@ -64,8 +64,8 @@ impl Instruction {
 
 impl VM {
   pub fn new(initial_memory: &[isize]) -> Self {
-    let (input, reader) = channel();
-    let (writer, output) = channel();
+    let (input, reader) = unbounded();
+    let (writer, output) = unbounded();
 
     let mut memory = initial_memory.to_vec();
     memory.resize(4000, 0);
@@ -212,9 +212,7 @@ impl VM {
   }
 
   pub fn pipe(&mut self, to: &mut Self) {
-    use std::sync::mpsc::*;
-
-    let (tx, rx) = channel();
+    let (tx, rx) = unbounded();
     self.writer = tx.clone();
     to.input = tx.clone();
     to.reader = rx;
