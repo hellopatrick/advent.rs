@@ -1,7 +1,8 @@
 use crate::intcode::*;
-use image::{GenericImage, GenericImageView, ImageBuffer, RgbImage};
+use image::ImageBuffer;
 use itertools::Itertools;
 use std::collections::HashMap;
+
 type Coordinate = (isize, isize);
 
 #[derive(Debug, PartialEq, Copy, Clone)]
@@ -29,10 +30,19 @@ impl From<isize> for Color {
   }
 }
 
-fn sendable(c: Option<Color>) -> isize {
-  match c {
-    None => 0,
-    Some(c) => c.into(),
+#[derive(Debug, PartialEq, Copy, Clone)]
+enum Turn {
+  Left,
+  Right,
+}
+
+impl From<isize> for Turn {
+  fn from(n: isize) -> Turn {
+    match n {
+      0 => Turn::Left,
+      1 => Turn::Right,
+      _ => unreachable!(),
+    }
   }
 }
 
@@ -45,45 +55,40 @@ enum Direction {
 }
 
 impl Direction {
-  fn turn(self, dir: isize) -> Direction {
+  fn turn(self, turn: Turn) -> Direction {
     match self {
-      Self::Up => {
-        if dir == 0 {
-          Self::Left
-        } else {
-          Self::Right
-        }
-      }
-      Self::Down => {
-        if dir == 0 {
-          Self::Right
-        } else {
-          Self::Left
-        }
-      }
-      Self::Left => {
-        if dir == 0 {
-          Self::Down
-        } else {
-          Self::Up
-        }
-      }
-      Self::Right => {
-        if dir == 0 {
-          Self::Up
-        } else {
-          Self::Down
-        }
-      }
+      Self::Up => match turn {
+        Turn::Left => Self::Left,
+        Turn::Right => Self::Right,
+      },
+      Self::Down => match turn {
+        Turn::Left => Self::Right,
+        Turn::Right => Self::Left,
+      },
+      Self::Left => match turn {
+        Turn::Left => Self::Down,
+        Turn::Right => Self::Up,
+      },
+      Self::Right => match turn {
+        Turn::Left => Self::Up,
+        Turn::Right => Self::Down,
+      },
     }
   }
+}
 
-  fn go(self, (x, y): Coordinate) -> Coordinate {
-    match self {
-      Self::Up => (x, y + 1),
-      Self::Down => (x, y - 1),
-      Self::Left => (x - 1, y),
-      Self::Right => (x + 1, y),
+trait Motion {
+  fn go(self, dir: Direction) -> Self;
+}
+
+impl Motion for Coordinate {
+  fn go(self, dir: Direction) -> Self {
+    let (x, y) = self;
+    match dir {
+      Direction::Up => (x, y + 1),
+      Direction::Down => (x, y - 1),
+      Direction::Left => (x - 1, y),
+      Direction::Right => (x + 1, y),
     }
   }
 }
@@ -96,19 +101,23 @@ fn solve_01(input: &str) -> usize {
   let output = vm.output.clone();
   let input = vm.input.clone();
 
-  let mut map: HashMap<Coordinate, Color> = HashMap::new();
+  let mut map = HashMap::new();
   let mut loc = (0, 0);
   let mut facing = Direction::Up;
   thread::spawn(move || vm.run());
 
-  input.send(sendable(map.get(&loc).copied()));
+  input
+    .send(map.get(&loc).copied().map(Color::into).unwrap_or(0))
+    .expect("initial send successful");
 
-  output.iter().tuples().for_each(|(color, direction)| {
+  output.iter().tuples().for_each(|(color, turn)| {
     let color = Color::from(color);
+    let turn = Turn::from(turn);
+
     map.insert(loc, color);
-    facing = facing.turn(direction);
-    loc = facing.go(loc);
-    input.send(sendable(map.get(&loc).copied()));
+    facing = facing.turn(turn);
+    loc = loc.go(facing);
+    input.send(map.get(&loc).copied().map(Color::into).unwrap_or(0));
   });
 
   map.len()
@@ -122,22 +131,24 @@ fn solve_02(input: &str) {
   let output = vm.output.clone();
   let input = vm.input.clone();
 
-  let mut map: HashMap<Coordinate, Color> = HashMap::new();
+  let mut map = HashMap::new();
   let mut loc = (0, 0);
   map.insert(loc, Color::White);
   let mut facing = Direction::Up;
   thread::spawn(move || vm.run());
 
-  input.send(sendable(map.get(&loc).copied()));
+  input
+    .send(map.get(&loc).copied().map(Color::into).unwrap_or(0))
+    .expect("initial send successful");
 
-  output.iter().tuples().for_each(|(color, direction)| {
+  output.iter().tuples().for_each(|(color, turn)| {
     let color = Color::from(color);
+    let turn = Turn::from(turn);
 
     map.insert(loc, color);
-
-    facing = facing.turn(direction);
-    loc = facing.go(loc);
-    input.send(sendable(map.get(&loc).copied()));
+    facing = facing.turn(turn);
+    loc = loc.go(facing);
+    input.send(map.get(&loc).copied().map(Color::into).unwrap_or(0));
   });
 
   let white_pixels = map
@@ -149,19 +160,19 @@ fn solve_02(input: &str) {
   let (min_x, _) = white_pixels.iter().min_by_key(|(x, _)| x).unwrap();
   let (_, min_y) = white_pixels.iter().min_by_key(|(_, y)| y).unwrap();
 
-  let adjusted = white_pixels
+  let white_pixels = white_pixels
     .iter()
     .map(|(x, y)| (x - min_x, y - min_y))
     .collect_vec();
 
-  let (max_x, _) = *adjusted.iter().max_by_key(|(x, _)| x).unwrap();
-  let (_, max_y) = *adjusted.iter().max_by_key(|(_, y)| y).unwrap();
+  let (max_x, _) = *white_pixels.iter().max_by_key(|(x, _)| x).unwrap();
+  let (_, max_y) = *white_pixels.iter().max_by_key(|(_, y)| y).unwrap();
 
   let img = ImageBuffer::from_fn((max_x + 1) as u32, (max_y + 1) as u32, |x, y| {
     let x = x as isize;
     let y = y as isize;
 
-    if adjusted.contains(&(x, y)) {
+    if white_pixels.contains(&(x, y)) {
       image::Luma([255u8])
     } else {
       image::Luma([0u8])
