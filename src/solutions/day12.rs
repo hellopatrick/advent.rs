@@ -13,6 +13,30 @@ impl Vector {
   fn energy(self) -> i32 {
     self.x.abs() + self.y.abs() + self.z.abs()
   }
+
+  fn diff(self, other: Vector) -> (i32, i32, i32) {
+    use std::cmp::Ordering;
+
+    let x = match self.x.cmp(&other.x) {
+      Ordering::Equal => 0,
+      Ordering::Less => 1,
+      Ordering::Greater => -1,
+    };
+
+    let y = match self.y.cmp(&other.y) {
+      Ordering::Equal => 0,
+      Ordering::Less => 1,
+      Ordering::Greater => -1,
+    };
+
+    let z = match self.z.cmp(&other.z) {
+      Ordering::Equal => 0,
+      Ordering::Less => 1,
+      Ordering::Greater => -1,
+    };
+
+    (x, y, z)
+  }
 }
 
 impl std::ops::Add<Vector> for Vector {
@@ -32,9 +56,9 @@ impl From<&str> for Vector {
 
     let caps = re.captures(input).unwrap();
 
-    let x = caps.get(1).map_or("0", |m| m.as_str()).parse().unwrap();
-    let y = caps.get(2).map_or("0", |m| m.as_str()).parse().unwrap();
-    let z = caps.get(3).map_or("0", |m| m.as_str()).parse().unwrap();
+    let x = caps.get(1).map_or("", |m| m.as_str()).parse().unwrap();
+    let y = caps.get(2).map_or("", |m| m.as_str()).parse().unwrap();
+    let z = caps.get(3).map_or("", |m| m.as_str()).parse().unwrap();
 
     Vector { x, y, z }
   }
@@ -57,6 +81,14 @@ struct Simulation {
   moons: Vec<Moon>,
 }
 
+impl Simulation {
+  fn new(moons: &[Moon]) -> Self {
+    Self {
+      moons: moons.to_vec(),
+    }
+  }
+}
+
 impl<'a> Iterator for Simulation {
   type Item = Vec<Moon>;
 
@@ -67,25 +99,13 @@ impl<'a> Iterator for Simulation {
       .iter()
       .map(|moon| {
         let v = self.moons.iter().fold(moon.v, |acc, next| {
-          let x = match moon.p.x.cmp(&next.p.x) {
-            Ordering::Equal => acc.x,
-            Ordering::Less => acc.x + 1,
-            Ordering::Greater => acc.x - 1,
-          };
+          let (dx, dy, dz) = moon.p.diff(next.p);
 
-          let y = match moon.p.y.cmp(&next.p.y) {
-            Ordering::Equal => acc.y,
-            Ordering::Less => acc.y + 1,
-            Ordering::Greater => acc.y - 1,
-          };
-
-          let z = match moon.p.z.cmp(&next.p.z) {
-            Ordering::Equal => acc.z,
-            Ordering::Less => acc.z + 1,
-            Ordering::Greater => acc.z - 1,
-          };
-
-          Vector { x, y, z }
+          Vector {
+            x: acc.x + dx,
+            y: acc.y + dy,
+            z: acc.z + dz,
+          }
         });
         Moon { p: moon.p, v }
       })
@@ -101,9 +121,7 @@ impl<'a> Iterator for Simulation {
 }
 
 fn solve_01(moons: &[Moon], steps: usize) -> i32 {
-  let mut sim = Simulation {
-    moons: moons.to_vec(),
-  };
+  let mut sim = Simulation::new(moons);
 
   let state = sim.nth(steps).unwrap();
 
@@ -125,9 +143,7 @@ fn lcm(a: usize, b: usize) -> usize {
 }
 
 fn solve_02(moons: &[Moon]) -> usize {
-  let sim = Simulation {
-    moons: moons.to_vec(),
-  };
+  let sim = Simulation::new(moons);
 
   let mut set = HashSet::new();
 
@@ -143,11 +159,9 @@ fn solve_02(moons: &[Moon]) -> usize {
 
   let x = set.len();
 
-  let sim = Simulation {
-    moons: moons.to_vec(),
-  };
+  let sim = Simulation::new(moons);
 
-  let mut set = HashSet::new();
+  set.clear();
 
   for state in sim {
     let i = state.iter().map(|m| (m.p.y, m.v.y)).collect_vec();
@@ -160,11 +174,9 @@ fn solve_02(moons: &[Moon]) -> usize {
 
   let y = set.len();
 
-  let sim = Simulation {
-    moons: moons.to_vec(),
-  };
+  let sim = Simulation::new(moons);
 
-  let mut set = HashSet::new();
+  set.clear();
 
   for state in sim {
     let i = state.iter().map(|m| (m.p.z, m.v.z)).collect_vec();
@@ -222,6 +234,21 @@ mod tests {
 
   #[test]
   fn part_two() {
-    unimplemented!();
+    let input = "<x=-8, y=-10, z=0>
+    <x=5, y=5, z=10>
+    <x=2, y=-7, z=3>
+    <x=9, y=-8, z=-3>";
+
+    let moons = input
+      .lines()
+      .map(|line| {
+        let p = line.trim().into();
+        let v = Vector { x: 0, y: 0, z: 0 };
+
+        Moon { p, v }
+      })
+      .collect_vec();
+
+    assert_eq!(solve_02(&moons), 4_686_774_924);
   }
 }
