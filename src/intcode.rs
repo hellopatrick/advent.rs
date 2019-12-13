@@ -2,7 +2,7 @@ use crossbeam::crossbeam_channel::*;
 
 #[derive(Debug)]
 pub struct VM {
-  memory: Vec<isize>,
+  pub memory: Vec<isize>,
   ip: usize,
   sp: usize,
   pub input: Sender<isize>,
