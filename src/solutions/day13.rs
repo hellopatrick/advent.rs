@@ -64,15 +64,10 @@ fn solve_02(input: &str) -> isize {
           ball = x;
           if paddle > 0 {
             let joystick = (ball - paddle).signum();
-            dbg!(paddle, x, joystick);
             input.send(joystick);
           }
-
-          dbg!(ball);
         }
-        Tile::Paddle => {
-          paddle = x;
-        }
+        Tile::Paddle => paddle = x,
         _ => (),
       };
     }
